@@ -83,6 +83,21 @@ sudo docker compose up -d --build
 The MCP endpoint is then at `http://127.0.0.1:8000/mcp` — point your MCP
 client's remote-server URL there; no command or args are needed.
 
+### Configuration with `.env`
+
+```bash
+cp .env.example .env
+nano .env        # set ANIMATION_MCP_PUBLIC_URL to the address your client will use
+sudo docker compose up -d --build
+```
+
+compose reads `.env` automatically and passes the variables into the container.
+The single most important value is `ANIMATION_MCP_PUBLIC_URL`: it drives both
+the download links and the MCP endpoint's accepted Host — a mismatch shows up
+as `421 Misdirected Request` on the client. If you reach the server by several
+addresses (public IP, private IP, hostname), set the primary one in
+`ANIMATION_MCP_PUBLIC_URL` and add the others to `ANIMATION_MCP_ALLOWED_HOSTS`.
+
 ### What compose sets up
 
 From `docker-compose.yml`:
