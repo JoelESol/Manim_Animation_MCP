@@ -1,0 +1,21 @@
+services:
+  animation-mcp:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      ANIMATION_MCP_OUTPUT_DIR: /data/output
+      ANIMATION_MCP_TIMEOUT: "120"
+      # How many renders may run at once; each render peaks at roughly
+      # 215 MB (480p15) to 700 MB (1080p60) of RAM. Size to your box.
+      ANIMATION_MCP_MAX_CONCURRENT_RENDERS: "2"
+      ANIMATION_MCP_QUEUE_WAIT_SECONDS: "30"
+    volumes:
+      - mcp-output:/data/output
+    restart: unless-stopped
+    # Uncomment for small hosts so a runaway render is contained:
+    # mem_limit: 1500m
+    # (each render subprocess also inherits this; see README sizing notes)
+
+volumes:
+  mcp-output:
