@@ -29,6 +29,33 @@ LINK_SECRET = os.environ.get(
 )
 LINK_TTL_HOURS = float(os.environ.get("ANIMATION_MCP_LINK_TTL_HOURS", "24"))
 
+
+def _host_allowlist() -> tuple[list[str], list[str]]:
+    """Host/Origin allowlists for the MCP endpoint's DNS-rebinding check.
+
+    Derived from PUBLIC_URL so that clients reaching the server by its real
+    address (e.g. http://134.87.10.114:8000) are accepted, plus the localhost
+    variants for local use. Entries are exact: bare host matches the Host
+    header without port, host:* matches any port.
+    """
+    from urllib.parse import urlsplit
+
+    parts = urlsplit(PUBLIC_URL)
+    hostname = parts.hostname or "127.0.0.1"
+    scheme = parts.scheme or "http"
+    extra = [h.strip() for h in
+             os.environ.get("ANIMATION_MCP_ALLOWED_HOSTS", "").split(",")
+             if h.strip()]
+
+    hosts = {hostname, f"{hostname}:*", "127.0.0.1", "127.0.0.1:*",
+             "localhost", "localhost:*", "[::1]", "[::1]:*"}
+    hosts.update(extra)
+    hosts.update(f"{h}:*" for h in extra)
+    origin = f"{scheme}://{hostname}"
+    origins = {origin, "http://127.0.0.1", "http://localhost"}
+    origins.update(extra)
+    return sorted(hosts), sorted(origins)
+
 # Render concurrency: how many manim subprocesses may run simultaneously.
 # Extra submissions wait in a queue for up to QUEUE_WAIT_SECONDS before
 # getting a busy error. Size these to your RAM: each render peaks at roughly

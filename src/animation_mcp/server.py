@@ -38,6 +38,7 @@ from animation_mcp.config import (
     PUBLIC_URL,
     QUEUE_WAIT_SECONDS,
     RENDER_TIMEOUT,
+    _host_allowlist,
 )
 
 mcp: MCPServer = MCPServer(
@@ -362,7 +363,8 @@ def main() -> None:
             # Custom routes must come before the catch-all MCP mount.
             Route("/files/{job_id}/{artifact_path:path}", download,
                   methods=["GET"]),
-            Mount("/", app=mcp.streamable_http_app()),
+            Mount("/", app=mcp.streamable_http_app(
+                transport_security=_transport_security())),
         ],
         lifespan=lifespan,
     )
@@ -370,6 +372,15 @@ def main() -> None:
     print(f"animation-mcp on {PUBLIC_URL}/mcp (downloads: {PUBLIC_URL}/files/...; "
           f"output dir: {DEFAULT_OUTPUT_DIR})", file=sys.stderr)
     uvicorn.run(app, host=HOST, port=PORT, log_level="warning")
+
+
+def _transport_security():
+    """MCP endpoint Host/Origin allowlist derived from PUBLIC_URL."""
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    hosts, origins = _host_allowlist()
+    return TransportSecuritySettings(allowed_hosts=hosts,
+                                     allowed_origins=origins)
 
 
 def _media_type(path: Path) -> str:

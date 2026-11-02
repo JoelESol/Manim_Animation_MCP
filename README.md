@@ -109,6 +109,7 @@ From `docker-compose.yml`:
 | `ANIMATION_MCP_QUEUE_WAIT_SECONDS` | `30` | How long a submission waits for a free slot before getting a busy error. |
 | `ANIMATION_MCP_LINK_TTL_HOURS` | `24` | Default download-link lifetime. |
 | `ANIMATION_MCP_LINK_SECRET` | random per process | Pin it so signed links survive restarts/replicas. |
+| `ANIMATION_MCP_ALLOWED_HOSTS` | — | Extra hostnames (comma-separated) accepted by the MCP endpoint's Host check, beyond those derived from `ANIMATION_MCP_PUBLIC_URL`. |
 
 Example: publish on a different port and make download links match:
 
@@ -141,6 +142,59 @@ python tests/test_concurrency_live.py
 ```
 
 Both suites were verified passing against the built image.
+
+## Deploying to a remote host
+
+To run on a server (e.g. `134.87.10.114`) and reach it from another machine
+(e.g. `134.87.8.213`):
+
+```bash
+# on the server (134.87.10.114), as ubuntu:
+sudo apt-get update && sudo apt-get install -y docker.io docker-compose-v2
+git clone https://github.com/JoelESol/Animation_MCP.git
+cd Animation_MCP
+
+# make download links use the address your other machine will open:
+export ANIMATION_MCP_PUBLIC_URL=http://134.87.10.114:8000
+sudo -E docker compose up -d --build
+```
+
+Two things make remote access work (both are handled by the above):
+
+1. **Bind address** — the Docker image sets `ANIMATION_MCP_HOST=0.0.0.0`, so
+   the server accepts connections on all interfaces, not just localhost.
+   (`localhost` inside the container is not the same machine as your client.)
+2. **Host allowlist** — the MCP SDK's DNS-rebinding protection only accepts
+   `localhost` Host headers by default; a client connecting to
+   `http://134.87.10.114:8000/mcp` would be rejected with `421 Misdirected
+   Request`. The server derives its allowlist from `ANIMATION_MCP_PUBLIC_URL`,
+   so setting it to the real address fixes this. Extra hostnames can be
+   whitelisted with `ANIMATION_MCP_ALLOWED_HOSTS` (comma-separated).
+
+Then point your MCP client on the other machine at
+`http://134.87.10.114:8000/mcp`. Download links will also use that address.
+
+Open the firewall for the client machine only:
+
+```bash
+sudo ufw allow from 134.87.8.213 to any port 8000 proto tcp
+sudo ufw enable
+```
+
+**Security warning:** the MCP endpoint and `/files/` downloads have **no
+authentication**, and `render_manim` executes arbitrary Python. Anyone who can
+reach port 8000 can run code on the server. Use the firewall rule above (or an
+SSH tunnel: `ssh -N -L 8000:localhost:8000 ubuntu@134.87.10.114` from the
+client, then `http://localhost:8000/mcp` locally), and do not expose the port
+to the internet at large until token auth is added.
+
+To verify from the client machine:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://134.87.10.114:8000/mcp
+# 400 = reachable and alive (400 just means 'missing MCP session headers');
+# 421 would mean the Host allowlist is wrong.
+```
 
 ## Click-to-download links
 
