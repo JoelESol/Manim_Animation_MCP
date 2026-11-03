@@ -66,8 +66,10 @@ python tests/test_concurrency_live.py
 
 The image is a **multi-stage build** (`python:3.12-slim`): a build stage
 compiles `pycairo` with cairo/pango dev headers and gcc; the runtime stage
-ships only the shared libraries (pango/cairo) plus **ffmpeg**, and runs as a
-non-root `renderer` user. The image is ~1.5 GB.
+ships the shared libraries (pango/cairo), **ffmpeg**, and a **LaTeX toolchain**
+(`texlive` + `texlive-latex-extra` + `dvisvgm`) so `MathTex`/`Tex` render
+out of the box, and runs as a non-root `renderer` user. The image is
+~3 GB (LaTeX accounts for most of it).
 
 ### Build and run
 

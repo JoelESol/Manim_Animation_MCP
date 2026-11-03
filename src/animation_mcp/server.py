@@ -50,7 +50,8 @@ mcp: MCPServer = MCPServer(
         "method to render_manim. Workflow: render a draft (quality 'l', or "
         "output_format='image' for fast layout iteration), inspect the "
         "returned preview, fix any errors, then re-render at 'm' or 'h' for "
-        "final output. Every successful render includes download_urls — "
+        "final output. The server has a LaTeX toolchain installed, so "
+        "MathTex/Tex work. Every successful render includes download_urls — "
         "share those links with the user so they can open the video/drawing."
     ),
 )

@@ -48,6 +48,24 @@ async def main() -> None:
                                              {"job_id": data["job_id"]})
             print("ARTIFACTS:", listed.content[0].text[:300])
 
+            # LaTeX path: MathTex must render (server ships a TeX toolchain).
+            MATH_CODE = """
+from manim import Axes, MathTex, RIGHT, Scene, Create, Write
+
+class MathDemo(Scene):
+    def construct(self):
+        axes = Axes(x_range=[0, 5, 1], y_range=[0, 5, 1])
+        self.play(Create(axes))
+        eq = MathTex(r"\\int_0^5 x^2\\,dx = \\frac{25}{3}").next_to(axes, RIGHT)
+        self.play(Write(eq))
+"""
+            math = await session.call_tool("render_manim", {
+                "code": MATH_CODE, "scene_name": "MathDemo", "quality": "l",
+            })
+            assert not math.is_error, math.content[0].text[:600]
+            mdata = math.structured_content
+            print("MATHTEX RENDER OK:", mdata["artifacts"][0])
+
             # --- download links ---
             urls = data["download_urls"]
             assert urls, data

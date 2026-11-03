@@ -22,11 +22,14 @@ RUN pip install --no-cache-dir .
 # ---- runtime stage ----
 FROM python:3.12-slim
 
-# Runtime shared libraries for manim (pango/cairo) plus ffmpeg for video
-# muxing and last-frame preview extraction.
+# Runtime shared libraries for manim (pango/cairo), ffmpeg for video muxing
+# and last-frame preview extraction, and a LaTeX toolchain (with dvisvgm)
+# so MathTex/Tex work. texlive-latex-extra brings the standalone class and
+# amsmath that manim's default templates require.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         libpango-1.0-0 libpangocairo-1.0-0 libcairo2 ffmpeg \
+        texlive texlive-latex-extra texlive-fonts-recommended dvisvgm \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /opt/venv /opt/venv
