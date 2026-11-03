@@ -8,6 +8,7 @@ drawings with [Manim](https://docs.manim.community) over **streamable HTTP**.
 ## Example Render
 
 ![Math and neural network demo](assets/repo_demo_math_nn.gif)
+
 Created using GLM-5.3-Flash
 ## Setup
 
