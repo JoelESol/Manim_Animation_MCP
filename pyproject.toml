@@ -19,13 +19,3 @@ dependencies = [
 
 [project.scripts]
 animation-mcp = "animation_mcp.server:main"
-
-[dependency-groups]
-dev = [
-    "pytest>=8",
-    "pytest-asyncio>=0.24",
-]
-
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
-testpaths = ["tests"]

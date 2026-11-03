@@ -5,8 +5,13 @@ media/
 output/
 data/
 .env
+.env.*
+!.env.example
 *.egg-info/
 dist/
 build/
 .pytest_cache/
 .idea/
+.vscode/
+tests/
+

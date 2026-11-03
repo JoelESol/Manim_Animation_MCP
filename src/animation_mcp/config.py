@@ -39,7 +39,7 @@ def _host_allowlist() -> tuple[list[str], list[str]]:
     """Host/Origin allowlists for the MCP endpoint's DNS-rebinding check.
 
     Derived from PUBLIC_URL so that clients reaching the server by its real
-    address (e.g. http://134.87.10.114:8000) are accepted, plus the localhost
+    address (e.g. http://203.0.113.10:8000) are accepted, plus the localhost
     variants for local use. Entries are exact: bare host matches the Host
     header without port, host:* matches any port.
     """

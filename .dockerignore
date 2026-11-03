@@ -1,0 +1,16 @@
+# Everything not needed to build the image.
+.git/
+.idea/
+.vscode/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+media/
+output/
+data/
+.env
+.env.*
+tests/
+Dockerfile
+docker-compose.yml
